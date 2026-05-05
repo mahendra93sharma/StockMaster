@@ -16,7 +16,7 @@ import javax.inject.Singleton
 @Singleton
 class TokenRefreshAuthenticator @Inject constructor(
     private val tokenStore: TokenStore,
-    private val refreshService: TokenRefreshService,
+    private val refreshService: dagger.Lazy<TokenRefreshService>,
 ) : Authenticator {
 
     override fun authenticate(route: Route?, response: Response): Request? {
@@ -29,7 +29,7 @@ class TokenRefreshAuthenticator @Inject constructor(
 
         val newTokens = runBlocking {
             try {
-                refreshService.refreshTokens(refreshToken)
+                refreshService.get().refreshTokens(refreshToken)
             } catch (e: Exception) {
                 Timber.e(e, "Token refresh failed")
                 null
