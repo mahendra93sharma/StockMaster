@@ -80,6 +80,11 @@ def create_app() -> FastAPI:
     app.include_router(admin_dashboard_router)
     app.include_router(metrics_router)
 
+    # Root
+    @app.get("/", tags=["infra"], include_in_schema=False)
+    async def root() -> dict:
+        return {"app": "StockMaster API", "version": "0.1.0", "docs": "/docs"}
+
     # Health check
     @app.get("/health", tags=["infra"])
     async def health() -> dict:
