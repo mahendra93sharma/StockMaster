@@ -1,5 +1,6 @@
 """Application settings loaded from environment."""
 
+from pydantic import model_validator
 from pydantic_settings import BaseSettings
 
 
@@ -10,6 +11,16 @@ class Settings(BaseSettings):
     # Database
     database_url: str = "postgresql+asyncpg://stockmaster:stockmaster@localhost:5432/stockmaster"
     db_echo: bool = False
+
+    @model_validator(mode="after")
+    def _fix_database_url(self) -> "Settings":
+        """Convert Render's postgres:// URL to async-compatible format."""
+        url = self.database_url
+        if url.startswith("postgres://"):
+            self.database_url = url.replace("postgres://", "postgresql+asyncpg://", 1)
+        elif url.startswith("postgresql://"):
+            self.database_url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
+        return self
 
     # Auth
     jwt_secret_key: str = "CHANGE-ME-IN-PRODUCTION"
