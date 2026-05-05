@@ -1,75 +1,124 @@
-{% extends "base.html" %}
-{% block title_suffix %} — Dashboard{% endblock %}
+{% extends "base_new.html" %}
+{% block title %}StockMaster Admin — Dashboard{% endblock %}
+{% block page_title %}Operator Overview{% endblock %}
 {% block content %}
-<h1>Dashboard</h1>
-
-<div class="stats-grid">
-    <div class="card stat-card">
-        <div class="stat-value">{{ stats.active_recommendations }}</div>
-        <div class="stat-label">Active Recommendations</div>
-    </div>
-    <div class="card stat-card">
-        <div class="stat-value">{{ stats.closed_trades }}</div>
-        <div class="stat-label">Closed Trades</div>
-    </div>
-    <div class="card stat-card">
-        <div class="stat-value {% if stats.avg_pnl >= 0 %}pnl-positive{% else %}pnl-negative{% endif %}">
-            {{ "%.1f"|format(stats.avg_pnl) }}%
+<!-- Key Stats Bento Grid -->
+<section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-md">
+    <div class="bg-surface-container-lowest p-md rounded-xl shadow-[0px_2px_4px_rgba(0,0,0,0.04)] border border-outline-variant/10">
+        <span class="font-label-sm text-label-sm text-on-surface-variant block mb-xs uppercase tracking-wider">Active Recommendations</span>
+        <div class="flex items-end justify-between">
+            <span class="font-headline-lg text-headline-lg text-primary">{{ stats.active_recommendations }}</span>
         </div>
-        <div class="stat-label">Avg PnL</div>
     </div>
-    <div class="card stat-card">
-        <div class="stat-value">{{ stats.instruments }}</div>
-        <div class="stat-label">Instruments Tracked</div>
-    </div>
-    <div class="card stat-card">
-        <div class="stat-value">{{ stats.scheduler_runs_today }}</div>
-        <div class="stat-label">Scheduler Runs Today</div>
-    </div>
-    <div class="card stat-card">
-        <div class="stat-value {% if stats.win_rate >= 50 %}pnl-positive{% else %}pnl-negative{% endif %}">
-            {{ "%.0f"|format(stats.win_rate) }}%
+    <div class="bg-surface-container-lowest p-md rounded-xl shadow-[0px_2px_4px_rgba(0,0,0,0.04)] border border-outline-variant/10">
+        <span class="font-label-sm text-label-sm text-on-surface-variant block mb-xs uppercase tracking-wider">Closed Trades</span>
+        <div class="flex items-end justify-between">
+            <span class="font-headline-lg text-headline-lg text-primary">{{ stats.closed_trades }}</span>
         </div>
-        <div class="stat-label">Win Rate</div>
     </div>
-</div>
-
-<div class="card">
-    <h2>Quick Actions</h2>
-    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.75rem;">
-        {% for job in jobs %}
-        <button class="btn btn-primary"
-                hx-post="/admin/dashboard/trigger/{{ job }}"
-                hx-swap="none"
-                hx-confirm="Trigger {{ job }} now?">
-            Run {{ job }}
-            <span class="htmx-indicator">⏳</span>
-        </button>
-        {% endfor %}
+    <div class="bg-surface-container-lowest p-md rounded-xl shadow-[0px_2px_4px_rgba(0,0,0,0.04)] border border-outline-variant/10">
+        <span class="font-label-sm text-label-sm text-on-surface-variant block mb-xs uppercase tracking-wider">Avg PnL</span>
+        <div class="flex items-end justify-between">
+            <span class="font-headline-lg text-headline-lg {% if stats.avg_pnl >= 0 %}text-emerald-600{% else %}text-error{% endif %}">{{ "%.1f"|format(stats.avg_pnl) }}%</span>
+        </div>
     </div>
-</div>
+    <div class="bg-surface-container-lowest p-md rounded-xl shadow-[0px_2px_4px_rgba(0,0,0,0.04)] border border-outline-variant/10">
+        <span class="font-label-sm text-label-sm text-on-surface-variant block mb-xs uppercase tracking-wider">Win Rate</span>
+        <div class="flex items-end justify-between">
+            <span class="font-headline-lg text-headline-lg {% if stats.win_rate >= 50 %}text-emerald-600{% else %}text-error{% endif %}">{{ "%.0f"|format(stats.win_rate) }}%</span>
+        </div>
+    </div>
+</section>
 
-<div class="card">
-    <h2>Recent Scheduler Runs</h2>
-    <table>
-        <thead>
-            <tr><th>Job</th><th>Started</th><th>Status</th><th>Items</th><th>Duration</th></tr>
-        </thead>
-        <tbody>
-            {% for run in recent_runs %}
-            <tr>
-                <td>{{ run.job_name }}</td>
-                <td>{{ run.started_at }}</td>
-                <td>
-                    {% if run.status == 'success' %}<span class="badge badge-success">{{ run.status }}</span>
-                    {% elif run.status == 'failed' %}<span class="badge badge-danger">{{ run.status }}</span>
-                    {% else %}<span class="badge badge-warning">{{ run.status }}</span>{% endif %}
-                </td>
-                <td>{{ run.items_ingested }}</td>
-                <td>{{ run.duration }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<!-- Main Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-lg">
+    <!-- Scheduler Status Widget -->
+    <section class="lg:col-span-2 space-y-md">
+        <div class="bg-surface-container-lowest rounded-xl shadow-[0px_4px_8px_rgba(0,0,0,0.04)] overflow-hidden border border-outline-variant/10">
+            <div class="p-md bg-surface-container-low flex justify-between items-center border-b border-outline-variant/20">
+                <h2 class="font-title-lg text-title-lg text-on-surface">Recent Scheduler Runs</h2>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead class="bg-surface-container-high">
+                        <tr>
+                            <th class="px-md py-sm font-label-sm text-on-surface-variant">Job Name</th>
+                            <th class="px-md py-sm font-label-sm text-on-surface-variant">Started</th>
+                            <th class="px-md py-sm font-label-sm text-on-surface-variant">Status</th>
+                            <th class="px-md py-sm font-label-sm text-on-surface-variant">Items</th>
+                            <th class="px-md py-sm font-label-sm text-on-surface-variant">Duration</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-outline-variant/10">
+                        {% for run in recent_runs %}
+                        <tr class="hover:bg-surface-container-low/50">
+                            <td class="px-md py-md">
+                                <span class="font-body-md text-on-surface font-bold">{{ run.job_name }}</span>
+                            </td>
+                            <td class="px-md py-md font-body-md text-on-surface-variant">{{ run.started_at }}</td>
+                            <td class="px-md py-md">
+                                {% if run.status == 'success' %}
+                                <span class="inline-flex items-center gap-xs px-sm py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-label-sm">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>Success
+                                </span>
+                                {% elif run.status == 'failed' %}
+                                <span class="inline-flex items-center gap-xs px-sm py-0.5 rounded-full bg-red-100 text-red-800 text-label-sm">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-red-600"></span>Failed
+                                </span>
+                                {% else %}
+                                <span class="inline-flex items-center gap-xs px-sm py-0.5 rounded-full bg-amber-100 text-amber-800 text-label-sm">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-600"></span>{{ run.status }}
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td class="px-md py-md font-body-md text-on-surface-variant">{{ run.items_ingested }}</td>
+                            <td class="px-md py-md font-body-md text-on-surface-variant">{{ run.duration }}</td>
+                        </tr>
+                        {% endfor %}
+                        {% if not recent_runs %}
+                        <tr><td colspan="5" class="px-md py-lg text-center text-on-surface-variant">No scheduler runs yet.</td></tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Actions & Stats -->
+    <section class="space-y-lg">
+        <div class="bg-primary-container text-on-primary-container p-lg rounded-xl shadow-lg relative overflow-hidden">
+            <div class="relative z-10">
+                <h3 class="font-title-lg text-title-lg mb-sm">Quick Actions</h3>
+                <p class="font-body-md opacity-80 mb-md">Trigger scraper jobs manually.</p>
+                <div class="flex flex-wrap gap-sm">
+                    {% for job in jobs %}
+                    <button class="bg-white/20 hover:bg-white/30 text-on-primary-container px-md py-sm rounded-lg font-label-sm text-label-sm flex items-center gap-xs transition-colors"
+                            hx-post="/admin/dashboard/trigger/{{ job }}"
+                            hx-swap="none"
+                            hx-confirm="Trigger {{ job }} now?">
+                        <span class="material-symbols-outlined text-[16px]">play_arrow</span>
+                        {{ job }}
+                        <span class="htmx-indicator">⏳</span>
+                    </button>
+                    {% endfor %}
+                </div>
+            </div>
+            <span class="material-symbols-outlined absolute -bottom-4 -right-4 text-[120px] opacity-10">automation</span>
+        </div>
+
+        <div class="bg-surface-container-lowest p-md rounded-xl border border-outline-variant/10">
+            <h3 class="font-title-lg text-title-lg text-on-surface mb-md">System Stats</h3>
+            <div class="space-y-md">
+                <div class="flex justify-between items-center">
+                    <span class="text-on-surface-variant font-label-sm">Instruments Tracked</span>
+                    <span class="font-bold text-primary">{{ stats.instruments }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-on-surface-variant font-label-sm">Runs Today</span>
+                    <span class="font-bold text-primary">{{ stats.scheduler_runs_today }}</span>
+                </div>
+            </div>
+        </div>
+    </section>
 </div>
 {% endblock %}

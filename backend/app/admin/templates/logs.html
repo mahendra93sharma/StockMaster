@@ -1,0 +1,137 @@
+{% extends "base_new.html" %}
+{% block title %}StockMaster Admin — LLM Costs & Logs{% endblock %}
+{% block page_title %}LLM Analytics & Logs{% endblock %}
+{% block content %}
+<!-- Page Title Area -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-md">
+    <div>
+        <p class="font-body-md text-on-surface-variant">Real-time oversight of model costs, throughput, and scheduler health.</p>
+    </div>
+</div>
+
+<!-- Bento Grid: Stats & Trends -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-lg">
+    <!-- Cost Metric -->
+    <div class="md:col-span-4 bg-surface shadow-sm border border-outline-variant/10 rounded-xl p-lg flex flex-col justify-between">
+        <div class="flex justify-between items-start">
+            <div>
+                <p class="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider">LLM Daily Cap</p>
+                <h3 class="font-ticker-display text-headline-lg mt-xs">${{ "%.2f"|format(llm_cap) }}</h3>
+            </div>
+        </div>
+        <div class="mt-lg">
+            <p class="text-label-sm text-on-surface-variant">Budget limit per day</p>
+        </div>
+    </div>
+
+    <!-- Model Info -->
+    <div class="md:col-span-4 bg-surface shadow-sm border border-outline-variant/10 rounded-xl p-lg flex flex-col justify-between">
+        <div class="flex justify-between items-start">
+            <div>
+                <p class="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider">Active Model</p>
+                <h3 class="font-ticker-display text-headline-md mt-xs">{{ model_name }}</h3>
+            </div>
+        </div>
+        <div class="mt-lg">
+            <span class="px-sm py-1 bg-primary-fixed text-on-primary-fixed rounded-full text-xs font-bold">Anthropic</span>
+        </div>
+    </div>
+
+    <!-- Scheduler Status -->
+    <div class="md:col-span-4 bg-primary-container text-on-primary-container shadow-sm rounded-xl p-lg relative overflow-hidden">
+        <div class="relative z-10">
+            <p class="text-label-sm font-label-sm opacity-80 uppercase tracking-wider">Scheduler Health</p>
+            <h3 class="font-headline-md text-headline-md mt-xs flex items-center gap-sm">
+                {% if scheduler_running %}
+                Operational
+                <span class="flex h-3 w-3 relative">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary-fixed opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-3 w-3 bg-secondary-fixed"></span>
+                </span>
+                {% else %}
+                Stopped
+                <span class="w-3 h-3 rounded-full bg-error"></span>
+                {% endif %}
+            </h3>
+            <div class="mt-lg space-y-sm">
+                <div class="flex justify-between text-label-sm">
+                    <span>Active Jobs</span>
+                    <span class="font-bold">{{ active_jobs }}</span>
+                </div>
+                <div class="flex justify-between text-label-sm">
+                    <span>Total Runs Today</span>
+                    <span class="font-bold">{{ runs_today }}</span>
+                </div>
+            </div>
+        </div>
+        <span class="material-symbols-outlined absolute -bottom-4 -right-4 text-[120px] opacity-10">automation</span>
+    </div>
+</div>
+
+<!-- Scheduler Logs Section -->
+<section class="space-y-md">
+    <div class="flex items-center justify-between">
+        <h3 class="font-title-lg text-title-lg text-on-surface">Recent Scheduler Logs</h3>
+    </div>
+
+    <!-- Terminal-style Log Console -->
+    <div class="bg-inverse-surface rounded-xl overflow-hidden shadow-lg border border-outline/20">
+        <div class="bg-surface-variant/10 px-md py-xs border-b border-outline/20 flex items-center gap-md">
+            <div class="flex gap-[6px]">
+                <div class="w-3 h-3 rounded-full bg-error/50"></div>
+                <div class="w-3 h-3 rounded-full bg-secondary-fixed-dim/50"></div>
+                <div class="w-3 h-3 rounded-full bg-outline-variant/50"></div>
+            </div>
+            <span class="text-label-sm font-label-sm text-outline-variant font-mono">scheduler-runs.log</span>
+        </div>
+        <div class="p-md font-mono text-body-md h-[350px] overflow-y-auto custom-scrollbar flex flex-col gap-xs">
+            {% for run in recent_runs %}
+            <div class="flex gap-md group {% if run.status == 'failed' %}bg-red-500/10 border-l-2 border-error px-1{% endif %}">
+                <span class="text-outline shrink-0">{{ run.started_at }}</span>
+                {% if run.status == 'success' %}
+                <span class="text-emerald-400 shrink-0 uppercase">[OK]</span>
+                <span class="text-surface-bright">{{ run.job_name }} — {{ run.items_ingested }} items in {{ run.duration }}</span>
+                {% elif run.status == 'failed' %}
+                <span class="text-red-400 shrink-0 uppercase">[ERR]</span>
+                <span class="text-red-200">{{ run.job_name }} — Failed</span>
+                {% else %}
+                <span class="text-amber-400 shrink-0 uppercase">[RUN]</span>
+                <span class="text-surface-bright">{{ run.job_name }} — {{ run.status }}</span>
+                {% endif %}
+            </div>
+            {% endfor %}
+            {% if not recent_runs %}
+            <div class="text-outline-variant italic">No scheduler logs available yet.</div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- Scheduler Jobs Table -->
+<section class="space-y-md">
+    <h3 class="font-title-lg text-title-lg text-on-surface">Scheduled Jobs</h3>
+    <div class="bg-surface rounded-xl shadow-sm border border-outline-variant/10 overflow-hidden">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-surface-container-low text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider">
+                    <th class="px-lg py-md font-bold">Job ID</th>
+                    <th class="px-lg py-md font-bold">Trigger</th>
+                    <th class="px-lg py-md font-bold text-right">Next Run</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-outline-variant/10 text-body-md">
+                {% for job in jobs %}
+                <tr class="hover:bg-surface-container transition-colors">
+                    <td class="px-lg py-md font-bold text-on-surface">{{ job.id }}</td>
+                    <td class="px-lg py-md text-on-surface-variant">{{ job.trigger }}</td>
+                    <td class="px-lg py-md text-right font-mono text-primary">{{ job.next_run }}</td>
+                </tr>
+                {% endfor %}
+                {% if not jobs %}
+                <tr><td colspan="3" class="px-lg py-lg text-center text-on-surface-variant">No scheduled jobs.</td></tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

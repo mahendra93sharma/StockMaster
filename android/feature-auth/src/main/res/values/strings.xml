@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- This will be overridden by the value from google-services.json -->
-    <string name="default_web_client_id" translatable="false">YOUR_WEB_CLIENT_ID</string>
+    <!-- Web Client ID for Google Sign-In (from Firebase Console) -->
+    <string name="default_web_client_id" translatable="false">775413225719-3tu31bnehae4j1m3mjrtqltu9bl6tsrh.apps.googleusercontent.com</string>
 </resources>

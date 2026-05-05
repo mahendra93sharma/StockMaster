@@ -290,3 +290,57 @@ async def scheduler_history_partial(request: Request, db: AsyncSession = Depends
     return templates.TemplateResponse(request, "partials/scheduler_history.html", {
         "runs": runs,
     })
+
+
+# ─── LLM Logs & Costs ────────────────────────────────────────────────────────
+
+
+@router.get("/logs", response_class=HTMLResponse)
+async def logs_page(request: Request, db: AsyncSession = Depends(get_db)):
+    if not _check_admin(request):
+        return RedirectResponse(url="/admin/login")
+
+    today_start = datetime.now(UTC).replace(hour=0, minute=0, second=0)
+
+    # Scheduler stats
+    runs_today = await db.execute(
+        select(func.count()).where(SchedulerRun.started_at >= today_start)
+    )
+
+    # Recent runs for log console
+    recent = await db.execute(
+        select(SchedulerRun).order_by(SchedulerRun.started_at.desc()).limit(50)
+    )
+    recent_runs = []
+    for run in recent.scalars().all():
+        duration = ""
+        if run.finished_at and run.started_at:
+            delta = run.finished_at - run.started_at
+            duration = f"{delta.total_seconds():.1f}s"
+        recent_runs.append({
+            "job_name": run.job_name,
+            "started_at": run.started_at.strftime("%H:%M:%S") if run.started_at else "",
+            "status": run.status.value,
+            "items_ingested": run.items_ingested,
+            "duration": duration,
+        })
+
+    # Scheduler jobs
+    jobs = []
+    for job in scheduler.get_jobs():
+        jobs.append({
+            "id": job.id,
+            "trigger": str(job.trigger),
+            "next_run": job.next_run_time.strftime("%Y-%m-%d %H:%M %Z") if job.next_run_time else "—",
+        })
+
+    return templates.TemplateResponse(request, "logs.html", {
+        "active_page": "logs",
+        "llm_cap": settings.llm_daily_budget if hasattr(settings, "llm_daily_budget") else 1.00,
+        "model_name": settings.llm_model if hasattr(settings, "llm_model") else "claude-sonnet-4-20250514",
+        "scheduler_running": scheduler.running,
+        "active_jobs": len(scheduler.get_jobs()),
+        "runs_today": runs_today.scalar() or 0,
+        "recent_runs": recent_runs,
+        "jobs": jobs,
+    })
