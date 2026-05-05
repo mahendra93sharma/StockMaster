@@ -1,0 +1,34 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+*.iml
+.vscode/settings.json
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+*.egg-info/
+dist/
+.mypy_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Android
+android/.gradle/
+android/build/
+android/*/build/
+android/local.properties
+android/google-services.json
+
+# Environment
+.env
+*.env.local
+
+# Secrets
+*.pem
+*.key

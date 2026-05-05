@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title_suffix %} — Scheduler{% endblock %}
+{% block content %}
+<h1>Scheduler Jobs</h1>
+
+<div class="card">
+    <h2>Registered Jobs</h2>
+    <table>
+        <thead>
+            <tr><th>Job ID</th><th>Trigger</th><th>Next Run</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+            {% for job in jobs %}
+            <tr>
+                <td>{{ job.id }}</td>
+                <td><code>{{ job.trigger }}</code></td>
+                <td>{{ job.next_run }}</td>
+                <td>
+                    <button class="btn btn-primary"
+                            hx-post="/admin/dashboard/trigger/{{ job.id }}"
+                            hx-swap="none"
+                            hx-confirm="Trigger {{ job.id }} now?">
+                        Run Now
+                    </button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="card">
+    <h2>Run History</h2>
+    <div hx-get="/admin/scheduler/history" hx-trigger="load" hx-swap="innerHTML">
+        <p style="color: var(--text-muted);">Loading...</p>
+    </div>
+</div>
+{% endblock %}

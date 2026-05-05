@@ -1,0 +1,27 @@
+*.iml
+.gradle
+/local.properties
+/.idea
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+# google-services.json — never commit (per-env files provided out-of-band)
+**/google-services.json
+
+# Signing
+*.jks
+*.keystore
+
+# Generated
+app/build/
+core/build/
+data/build/
+domain/build/
+feature-auth/build/
+feature-home/build/
+feature-stock/build/
+feature-profile/build/

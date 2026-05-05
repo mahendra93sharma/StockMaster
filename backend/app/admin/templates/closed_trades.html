@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title_suffix %} — Closed Trades{% endblock %}
+{% block content %}
+<h1>Closed Trades</h1>
+
+<div class="stats-grid">
+    <div class="card stat-card">
+        <div class="stat-value">{{ summary.total }}</div>
+        <div class="stat-label">Total Closed</div>
+    </div>
+    <div class="card stat-card">
+        <div class="stat-value pnl-positive">{{ summary.wins }}</div>
+        <div class="stat-label">Wins</div>
+    </div>
+    <div class="card stat-card">
+        <div class="stat-value pnl-negative">{{ summary.losses }}</div>
+        <div class="stat-label">Losses</div>
+    </div>
+    <div class="card stat-card">
+        <div class="stat-value {% if summary.avg_pnl >= 0 %}pnl-positive{% else %}pnl-negative{% endif %}">
+            {{ "%.2f"|format(summary.avg_pnl) }}%
+        </div>
+        <div class="stat-label">Avg PnL</div>
+    </div>
+</div>
+
+<div class="card">
+    <table>
+        <thead>
+            <tr>
+                <th>Instrument</th>
+                <th>Horizon</th>
+                <th>Action</th>
+                <th>Entry</th>
+                <th>Exit</th>
+                <th>PnL</th>
+                <th>Reason</th>
+                <th>Closed At</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for trade in trades %}
+            <tr>
+                <td>{{ trade.instrument_name }}<br><small style="color: var(--text-muted);">{{ trade.exchange }}</small></td>
+                <td><span class="badge badge-info">{{ trade.horizon }}</span></td>
+                <td>
+                    {% if trade.action == 'BUY' %}<span class="badge badge-success">BUY</span>
+                    {% elif trade.action == 'SELL' %}<span class="badge badge-danger">SELL</span>
+                    {% else %}<span class="badge badge-warning">HOLD</span>{% endif %}
+                </td>
+                <td>₹{{ "%.2f"|format(trade.entry) }}</td>
+                <td>₹{{ "%.2f"|format(trade.exit_price) }}</td>
+                <td class="{% if trade.pnl_pct >= 0 %}pnl-positive{% else %}pnl-negative{% endif %}">
+                    {{ "%+.2f"|format(trade.pnl_pct) }}%
+                </td>
+                <td>{{ trade.close_reason }}</td>
+                <td>{{ trade.closed_at }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
