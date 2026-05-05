@@ -11,7 +11,7 @@ services:
   - type: web
     name: stockmaster-api
     runtime: docker
-    repo: https://github.com/mahendramahi/StockMaster
+    repo: https://github.com/mahendra93sharma/StockMaster
     rootDir: backend
     dockerfilePath: ./Dockerfile
     plan: free
