@@ -1,0 +1,35 @@
+# Render Blueprint — StockMaster Backend
+# https://docs.render.com/infrastructure-as-code
+
+databases:
+  - name: stockmaster-db
+    plan: free
+    databaseName: stockmaster
+    user: stockmaster
+
+services:
+  - type: web
+    name: stockmaster-api
+    runtime: docker
+    repo: https://github.com/mahendramahi/StockMaster
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    plan: free
+    region: oregon
+    healthCheckPath: /health
+    envVars:
+      - key: ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: stockmaster-db
+          property: connectionString
+        # Render provides postgres://, we need postgresql+asyncpg://
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: FIREBASE_PROJECT_ID
+        sync: false  # Set manually in Render dashboard
+      - key: ANTHROPIC_API_KEY
+        sync: false  # Set manually in Render dashboard
+      - key: GOOGLE_APPLICATION_CREDENTIALS
+        sync: false  # Set manually in Render dashboard
