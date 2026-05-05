@@ -56,6 +56,14 @@ def _check_admin(request: Request) -> bool:
 # ─── Dashboard ───────────────────────────────────────────────────────────────
 
 
+@router.get("", response_class=HTMLResponse, include_in_schema=False)
+@router.get("/", response_class=HTMLResponse, include_in_schema=False)
+async def admin_root(request: Request):
+    if _check_admin(request):
+        return RedirectResponse(url="/admin/dashboard", status_code=303)
+    return RedirectResponse(url="/admin/login", status_code=303)
+
+
 @router.get("/login", response_class=HTMLResponse)
 async def login_page(request: Request):
     return templates.TemplateResponse(request, "login.html")

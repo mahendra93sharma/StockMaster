@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>{% block title %}StockMaster Admin{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Work+Sans:wght@500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "inverse-surface": "#303036",
+                        "primary": "#000666",
+                        "on-primary-fixed-variant": "#343d96",
+                        "on-secondary": "#ffffff",
+                        "on-surface": "#1b1b21",
+                        "inverse-primary": "#bdc2ff",
+                        "on-primary": "#ffffff",
+                        "tertiary-fixed": "#ffdbd0",
+                        "primary-fixed-dim": "#bdc2ff",
+                        "secondary-container": "#90efef",
+                        "tertiary-container": "#5c1800",
+                        "error": "#ba1a1a",
+                        "secondary-fixed-dim": "#76d6d5",
+                        "surface-dim": "#dbd9e1",
+                        "inverse-on-surface": "#f2eff8",
+                        "on-tertiary-container": "#e17c5a",
+                        "surface": "#fbf8ff",
+                        "surface-container": "#efecf5",
+                        "primary-fixed": "#e0e0ff",
+                        "on-secondary-fixed": "#002020",
+                        "on-error": "#ffffff",
+                        "surface-bright": "#fbf8ff",
+                        "surface-container-highest": "#e4e1ea",
+                        "surface-variant": "#e4e1ea",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "secondary-fixed": "#93f2f2",
+                        "outline-variant": "#c6c5d4",
+                        "primary-container": "#1a237e",
+                        "on-primary-fixed": "#000767",
+                        "tertiary": "#380b00",
+                        "secondary": "#006a6a",
+                        "on-secondary-container": "#006e6e",
+                        "outline": "#767683",
+                        "surface-container-high": "#eae7ef",
+                        "on-tertiary-fixed": "#390c00",
+                        "background": "#fbf8ff",
+                        "on-primary-container": "#8690ee",
+                        "surface-container-low": "#f5f2fb",
+                        "on-error-container": "#93000a",
+                        "error-container": "#ffdad6",
+                        "surface-tint": "#4c56af",
+                        "on-tertiary-fixed-variant": "#7b2e12",
+                        "on-secondary-fixed-variant": "#004f4f",
+                        "tertiary-fixed-dim": "#ffb59d",
+                        "on-surface-variant": "#454652",
+                        "on-background": "#1b1b21"
+                    },
+                    borderRadius: { DEFAULT: "4px", lg: "8px", xl: "12px", full: "9999px" },
+                    spacing: { md: "16px", xs: "4px", gutter: "16px", xl: "32px", "margin-tablet": "24px", base: "4px", sm: "8px", lg: "24px", "margin-mobile": "16px" },
+                    fontFamily: { "title-lg": ["Work Sans"], "body-lg": ["Inter"], "headline-md": ["Work Sans"], "label-sm": ["Inter"], "body-md": ["Inter"], "ticker-display": ["Inter"], "headline-lg": ["Work Sans"] },
+                    fontSize: {
+                        "title-lg": ["20px", {lineHeight: "28px", fontWeight: "500"}],
+                        "body-lg": ["16px", {lineHeight: "24px", fontWeight: "400"}],
+                        "headline-md": ["24px", {lineHeight: "32px", fontWeight: "600"}],
+                        "label-sm": ["11px", {lineHeight: "16px", fontWeight: "500"}],
+                        "body-md": ["14px", {lineHeight: "20px", fontWeight: "400"}],
+                        "ticker-display": ["18px", {lineHeight: "24px", letterSpacing: "0.05em", fontWeight: "700"}],
+                        "headline-lg": ["32px", {lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "600"}]
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        body { background-color: #fbf8ff; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #c6c5d4; border-radius: 10px; }
+        .htmx-indicator { display: none; }
+        .htmx-request .htmx-indicator { display: inline; }
+    </style>
+</head>
+<body class="flex min-h-screen font-body-md text-body-md">
+    <!-- Sidebar Navigation -->
+    <aside class="hidden md:flex flex-col w-64 bg-surface-container-low border-r border-outline-variant/20 sticky top-0 h-screen">
+        <div class="px-lg py-xl">
+            <div class="flex items-center gap-sm">
+                <span class="material-symbols-outlined text-primary text-headline-md">trending_up</span>
+                <span class="font-headline-md text-headline-md font-bold text-primary">StockMaster</span>
+            </div>
+        </div>
+        <nav class="flex-1 px-md space-y-xs">
+            <a class="flex items-center gap-md px-md py-sm rounded-lg {% if active_page == 'dashboard' %}bg-secondary-container text-on-secondary-container{% else %}text-on-surface-variant hover:bg-surface-container-high{% endif %} transition-colors duration-200" href="/admin/dashboard">
+                <span class="material-symbols-outlined">dashboard</span>
+                <span class="font-body-md">Dashboard</span>
+            </a>
+            <a class="flex items-center gap-md px-md py-sm rounded-lg {% if active_page == 'recommendations' %}bg-secondary-container text-on-secondary-container{% else %}text-on-surface-variant hover:bg-surface-container-high{% endif %} transition-colors duration-200" href="/admin/recommendations">
+                <span class="material-symbols-outlined">lightbulb</span>
+                <span class="font-body-md">Recommendations</span>
+            </a>
+            <a class="flex items-center gap-md px-md py-sm rounded-lg {% if active_page == 'closed_trades' %}bg-secondary-container text-on-secondary-container{% else %}text-on-surface-variant hover:bg-surface-container-high{% endif %} transition-colors duration-200" href="/admin/closed-trades">
+                <span class="material-symbols-outlined">payments</span>
+                <span class="font-body-md">Closed Trades</span>
+            </a>
+            <a class="flex items-center gap-md px-md py-sm rounded-lg {% if active_page == 'scheduler' %}bg-secondary-container text-on-secondary-container{% else %}text-on-surface-variant hover:bg-surface-container-high{% endif %} transition-colors duration-200" href="/admin/scheduler">
+                <span class="material-symbols-outlined">schedule</span>
+                <span class="font-body-md">Scheduler</span>
+            </a>
+            <a class="flex items-center gap-md px-md py-sm rounded-lg {% if active_page == 'logs' %}bg-secondary-container text-on-secondary-container{% else %}text-on-surface-variant hover:bg-surface-container-high{% endif %} transition-colors duration-200" href="/admin/logs">
+                <span class="material-symbols-outlined">description</span>
+                <span class="font-body-md">LLM Costs & Logs</span>
+            </a>
+        </nav>
+        <div class="p-md border-t border-outline-variant/20">
+            <div class="flex items-center gap-sm bg-surface p-sm rounded-lg">
+                <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-on-primary font-bold">A</div>
+                <div class="flex flex-col">
+                    <span class="font-label-sm text-label-sm text-on-surface font-bold">Admin Operator</span>
+                    <span class="font-label-sm text-label-sm text-on-surface-variant">Production</span>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col min-w-0">
+        <!-- Top Bar -->
+        <header class="bg-surface shadow-sm h-16 flex justify-between items-center px-margin-mobile w-full sticky top-0 z-40">
+            <div class="flex items-center gap-sm md:hidden">
+                <span class="material-symbols-outlined text-primary">trending_up</span>
+                <span class="font-headline-md text-headline-md font-bold text-primary">StockMaster</span>
+            </div>
+            <div class="hidden md:block">
+                <h1 class="font-headline-md text-headline-md font-bold text-primary">{% block page_title %}Admin{% endblock %}</h1>
+            </div>
+            <div class="flex items-center gap-md">
+                <div class="hidden sm:flex items-center gap-xs px-sm py-1 bg-surface-container rounded-full border border-outline-variant/30">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    <span class="font-label-sm text-label-sm text-on-surface-variant">System Live</span>
+                </div>
+                <a href="/admin/login" class="p-sm rounded-full hover:bg-surface-container-high transition-colors text-on-surface-variant" title="Logout">
+                    <span class="material-symbols-outlined">logout</span>
+                </a>
+            </div>
+        </header>
+
+        <!-- Page Content -->
+        <div class="p-margin-mobile lg:p-lg space-y-lg overflow-y-auto custom-scrollbar flex-1">
+            {% block content %}{% endblock %}
+        </div>
+
+        <!-- Footer -->
+        <footer class="w-full py-sm px-margin-mobile text-center bg-surface-container-low border-t border-outline-variant/20">
+            <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-[0.2em] font-bold">Internal Admin Use Only.</p>
+            <p class="font-label-sm text-label-sm text-on-surface-variant/60 mt-1">For educational purposes only — not investment advice.</p>
+        </footer>
+    </main>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="fixed bottom-0 w-full z-50 flex justify-around items-center h-16 px-sm bg-surface border-t border-outline-variant/10 shadow-lg md:hidden">
+        <a class="flex flex-col items-center justify-center {% if active_page == 'dashboard' %}bg-secondary-container text-on-secondary-container rounded-full px-4 py-1{% else %}text-on-surface-variant{% endif %}" href="/admin/dashboard">
+            <span class="material-symbols-outlined text-[20px]">dashboard</span>
+            <span class="font-label-sm text-[10px]">Home</span>
+        </a>
+        <a class="flex flex-col items-center justify-center {% if active_page == 'recommendations' %}bg-secondary-container text-on-secondary-container rounded-full px-4 py-1{% else %}text-on-surface-variant{% endif %}" href="/admin/recommendations">
+            <span class="material-symbols-outlined text-[20px]">lightbulb</span>
+            <span class="font-label-sm text-[10px]">Recs</span>
+        </a>
+        <a class="flex flex-col items-center justify-center {% if active_page == 'scheduler' %}bg-secondary-container text-on-secondary-container rounded-full px-4 py-1{% else %}text-on-surface-variant{% endif %}" href="/admin/scheduler">
+            <span class="material-symbols-outlined text-[20px]">schedule</span>
+            <span class="font-label-sm text-[10px]">Scheduler</span>
+        </a>
+        <a class="flex flex-col items-center justify-center {% if active_page == 'logs' %}bg-secondary-container text-on-secondary-container rounded-full px-4 py-1{% else %}text-on-surface-variant{% endif %}" href="/admin/logs">
+            <span class="material-symbols-outlined text-[20px]">analytics</span>
+            <span class="font-label-sm text-[10px]">Logs</span>
+        </a>
+    </nav>
+</body>
+</html>

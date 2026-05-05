@@ -35,7 +35,7 @@ android {
             dimension = "env"
             applicationIdSuffix = ".uat"
             versionNameSuffix = "-uat"
-            buildConfigField("String", "BASE_URL", "\"https://uat.api.stockmaster.app/\"")
+            buildConfigField("String", "BASE_URL", "\"https://stockmaster-api-hel1.onrender.com/\"")
             buildConfigField("String", "ENV_LABEL", "\"UAT\"")
         }
         create("production") {
