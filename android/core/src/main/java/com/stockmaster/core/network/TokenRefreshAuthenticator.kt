@@ -29,7 +29,7 @@ class TokenRefreshAuthenticator @Inject constructor(
 
         val newTokens = runBlocking {
             try {
-                refreshService.refresh(refreshToken)
+                refreshService.refreshTokens(refreshToken)
             } catch (e: Exception) {
                 Timber.e(e, "Token refresh failed")
                 null

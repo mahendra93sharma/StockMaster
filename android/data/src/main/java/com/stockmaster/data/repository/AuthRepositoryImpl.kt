@@ -24,7 +24,13 @@ class AuthRepositoryImpl @Inject constructor(
         return response.toDomain()
     }
 
-    override suspend fun refresh(refreshToken: String): TokenPair? {
+    override suspend fun refresh(refreshToken: String): AuthTokens {
+        val response = authApi.refresh(RefreshRequestDto(refreshToken = refreshToken))
+        tokenStore.saveTokens(response.accessToken, response.refreshToken)
+        return response.toDomain()
+    }
+
+    override suspend fun refreshTokens(refreshToken: String): TokenPair? {
         return try {
             val response = authApi.refresh(RefreshRequestDto(refreshToken = refreshToken))
             tokenStore.saveTokens(response.accessToken, response.refreshToken)
