@@ -61,6 +61,21 @@ async def seed_data() -> None:
         )
         db.add(admin)
 
+        # Test users
+        test_user_1 = User(
+            email="testuser1@stockmaster.app",
+            display_name="Test User One",
+            role=UserRole.user,
+        )
+        db.add(test_user_1)
+
+        test_user_2 = User(
+            email="testuser2@stockmaster.app",
+            display_name="Test User Two",
+            role=UserRole.user,
+        )
+        db.add(test_user_2)
+
         # Instruments
         instruments: list[Instrument] = []
         for data in SEED_INSTRUMENTS:
@@ -120,7 +135,7 @@ async def seed_data() -> None:
                 db.add(rec)
 
         await db.commit()
-        print(f"Seeded: {len(instruments)} instruments, {len(instruments) * 3} recommendations, 15 bulk deals")
+        print(f"Seeded: 1 admin + 2 test users, {len(instruments)} instruments, {len(instruments) * 3} recommendations, 15 bulk deals")
 
 
 if __name__ == "__main__":

@@ -17,6 +17,7 @@ services:
     plan: free
     region: oregon
     healthCheckPath: /health
+    preDeployCommand: "alembic upgrade head && python -m app.seed"
     envVars:
       - key: ENV
         value: production
