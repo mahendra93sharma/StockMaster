@@ -31,5 +31,7 @@ services:
         sync: false  # Set manually in Render dashboard
       - key: ANTHROPIC_API_KEY
         sync: false  # Set manually in Render dashboard
+      - key: API_AUTH_TOKEN
+        value: SDXS0xQAqPYwy1xoYJeFtwdiWrCAAuYSIpIyXlHqICg
       - key: GOOGLE_APPLICATION_CREDENTIALS
         sync: false  # Set manually in Render dashboard
