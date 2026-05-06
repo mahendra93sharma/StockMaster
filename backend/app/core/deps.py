@@ -8,6 +8,7 @@ from jose import JWTError
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
 from app.core.exceptions import ForbiddenError, UnauthorizedError
 from app.core.security import decode_access_token
 from app.db.models import User, UserRole
@@ -20,12 +21,28 @@ async def get_current_user(
     credentials: HTTPAuthorizationCredentials | None = Depends(_bearer_scheme),
     db: AsyncSession = Depends(get_db),
 ) -> User:
-    """Extract and validate JWT, return the authenticated User."""
+    """Extract and validate JWT, return the authenticated User.
+
+    Also supports a static API_AUTH_TOKEN for dev/test usage.
+    """
     if credentials is None:
         raise UnauthorizedError("Missing authorization header")
 
+    token = credentials.credentials
+
+    # Static token bypass (dev/test)
+    if settings.api_auth_token and token == settings.api_auth_token:
+        result = await db.execute(
+            select(User).where(User.role == UserRole.admin).limit(1)
+        )
+        user = result.scalar_one_or_none()
+        if user is None:
+            raise UnauthorizedError("No admin user found for token-based auth")
+        return user
+
+    # Standard JWT flow
     try:
-        payload = decode_access_token(credentials.credentials)
+        payload = decode_access_token(token)
     except JWTError:
         raise UnauthorizedError() from None
 

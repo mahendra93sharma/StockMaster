@@ -31,6 +31,9 @@ class Settings(BaseSettings):
     # Firebase
     firebase_project_id: str = ""
 
+    # Static API auth token (dev/test bypass — set to enable token-based access)
+    api_auth_token: str = ""
+
     # Anthropic
     anthropic_api_key: str = ""
     anthropic_model: str = "claude-sonnet-4-20250514"
